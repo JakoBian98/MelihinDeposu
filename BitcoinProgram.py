@@ -4,13 +4,17 @@ from binance.client import Client
 import pandas as pd
 from PIL import Image,ImageTk
 import requests
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from datetime import datetime
+
 client = Client(api_key="", api_secret="")
 
 def göster():
    try:
        sembol = str(görüntüle.get())
        coin = client.get_symbol_ticker(symbol=sembol.upper())
-       messagebox.showinfo("Sonuç ", f"1 {sembol} : {coin['price']} USDT")
+       messagebox.showinfo("Sonuç ", f"1 {sembol} : {coin['price']}")
    except:
        messagebox.showerror("Hata","Bir hata oluştu")
 def en_yüksek():
@@ -148,7 +152,7 @@ def ortalama_fonksiyonları():
     def bir_ay_ort():
         try:
                 sembol = görüntüle.get()
-                klines = client.get_klines(symbol=sembol, interval="1d", limit=30)
+                klines = client.get_klines(symbol=sembol.upper(), interval="1d", limit=30)
                 prices1 = [float(kline[4]) for kline in klines]
                 avg_price = sum(prices1) / len(prices1)
                 messagebox.showinfo("Sonuç", f"1 Aylık ortalama {avg_price}")
@@ -427,7 +431,7 @@ def değişim_fonksiyonları():
         try:
             sembol = str(görüntüle.get())
             kline1ay = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MONTH, limit=2)
-            ilk_ay = float(kline1ay[0][1])
+            ilk_ay = float(kline1ay[0][4])
             son_ay = float(kline1ay[-1][4])
             değişim1_ay = ((son_ay - ilk_ay) / ilk_ay) * 100
             messagebox.showinfo("Sonuç", f"1 aylık değişim %{değişim1_ay}")
@@ -435,6 +439,17 @@ def değişim_fonksiyonları():
             messagebox.showerror("Hata","Bir hata oluştu")
 
     tk.Label(çerçeve,text=f"Görüntülemek istediğiniz coini aşağıya yazın").pack()
+
+    def değişim_1_yıl():
+        try:
+            sembol = str(görüntüle.get())
+            kline_1_yıl = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_1MONTH, limit=13)
+            ilk_yıl = float(kline_1_yıl[0][4])
+            son_1_yıl = float(kline_1_yıl[-1][4])
+            değişim_1_year = ((son_1_yıl - ilk_yıl) / ilk_yıl) * 100
+            messagebox.showinfo("Sonuç", f"1 yıllık değişim : {değişim_1_year}")
+        except Exception as e:
+            messagebox.showerror("Hata",f"{e}")
 
     görüntüle = tk.Entry(çerçeve)
     görüntüle.pack()
@@ -695,6 +710,436 @@ def pump_dump_dedektör():
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
+def grafik_fonksiyonları():
+    çerçeve = tk.Toplevel(pencere)
+    çerçeve.title("Grafikler Menüsü")
+
+    gir_width = 20
+    gir_height = 1
+
+    def grafik_24_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("24 Saatlik Kripto Para değişim grafiği")
+            grafik_pencere.geometry("800x600")
+
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_5MINUTE, limit=288)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} - Son 24 Saatlik Kapanış Fiyatları")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_1_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Saatlik Grafik")
+            grafik_pencere.geometry("800x600")
+
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=600)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="green")
+            ax.set_title(f"{sembol} - 1 Saatlik Grafik")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_5_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("5 Dakikalık Grafik")
+            grafik_pencere.geometry("800x600")
+
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1SECOND, limit=300)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="red")
+            ax.set_title(f"{sembol} - 5 Dakikalık Grafik")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_12_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("12 Saatlik Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=720)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 12 Saatlik Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_6_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("6 Saatlik Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=360)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 6 Saatlik Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_1_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Dakikalık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1SECOND, limit=60)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 1 Dakikalık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_15_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("15 Dakikalık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1SECOND, limit=900)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 15 Dakikalık Fiyat Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_30_dk():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("30 Dakikalık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=30)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="red")
+            ax.set_title(f"{sembol} 30 Dakikalık Fiyat Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_1_hafta():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Haftalık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_15MINUTE, limit=672)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 1 Haftalık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_1_ay():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Aylık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1HOUR, limit=720)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 1 Aylık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_3_ay():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("3 Aylık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(),interval="3h", limit=720)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 3 Aylık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_6_ay():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("6 Aylık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(), interval="5h", limit=864)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 6 Aylık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_1_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Yıllık Değişim Grafiği")
+            grafik_pencere.geometry("100x600")
+
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_12HOUR, limit=730)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar)
+            ax.set_title(f"{sembol} 1 Yıllık Değişim Grafiği")
+            ax.set_ylabel("Fiyatlar")
+            ax.set_xlabel("Zaman")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+    def grafik_5_yıl():
+        grafik_pencere = tk.Toplevel(çerçeve)
+        grafik_pencere.title("5 Yıllık Değişim Grafiği")
+        grafik_pencere.geometry("100x600")
+
+        sembol = str(görüntüle2.get())
+        klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=912)
+        zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+        fiyatlar = [float(k[4]) for k in klines]
+        fig = Figure(figsize=(10, 5), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot(zamanlar, fiyatlar, color="blue")
+        ax.set_title(f"{sembol} 5 Yıllık Değişim Grafiği")
+        ax.set_ylabel("Fiyat")
+        ax.set_xlabel("Tarih")
+        ax.grid(True)
+        fig.autofmt_xdate(rotation=45)
+        canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+    def grafik_2_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("2 Yıllık Değişim Grafiği")
+            grafik_pencere.geometry("100x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1DAY, limit=730)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 2 Yıllık Değişim Grafiği")
+            ax.set_ylabel("Fiyat")
+            ax.set_xlabel("Tarih")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+
+    def grafik_3_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("3 Yıllık Değişim Grafiği")
+            grafik_pencere.geometry("100x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=547)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 3 Yıllık Değişim Grafiği")
+            ax.set_ylabel("Fiyat")
+            ax.set_xlabel("Tarih")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_4_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("5 Yıllık Değişim Grafiği")
+            grafik_pencere.geometry("100x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=730)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 4 Yıllık Değişim Grafiği")
+            ax.set_ylabel("Fiyat")
+            ax.set_xlabel("Tarih")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e:
+            messagebox.showerror("HATA", f"{e}")
+
+
+    tk.Label(çerçeve, text="Grafiğini görüntülemek istediğiniz coin'i girin").pack()
+    görüntüle2 = tk.Entry(çerçeve)
+    görüntüle2.pack()
+
+
+    tk.Button(çerçeve, text="1 Dakikalık Grafik", command=grafik_1_dakika, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="5 Dakikalık Grafik", command=grafik_5_dakika, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="15 Dakikalık Grafik", command=grafik_15_dakika, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="30 Dakikalık Grafik", command=grafik_30_dk, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="1 Saatlik Grafik", command=grafik_1_saat, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="6 Saatlik Grafik", command=grafik_6_saat, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="12 Saatlik Grafik", command=grafik_12_saat, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="24 Saatlik Grafik", command=grafik_24_saat, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="1 Haftalık Grafik", command=grafik_1_hafta, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="1 Aylık Grafik", command=grafik_1_ay, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="3 Aylık Grafik", command=grafik_3_ay, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve, text="6 Aylık Grafik", command=grafik_6_ay, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Yıllık Grafik",command=grafik_1_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="2 Yıllık Grafik",command=grafik_2_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="3 Yıllık Grafik",command=grafik_3_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="4 Yıllık Grafik",command=grafik_4_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="5 Yıllık Grafik",command=grafik_5_yıl,width=gir_width,height=gir_height).pack()
+
 
 pencere = tk.Tk()
 pencere.title("Kripto Para menüsü")
@@ -718,6 +1163,7 @@ gir_width = 20
 gir_height=1
 
 tk.Button(pencere, text="Anlık fiyat", command=göster,width=gir_width,height=gir_height).pack()
+tk.Button(pencere,text="Değişim Grafikleri",command=grafik_fonksiyonları,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En yüksek", command=en_yüksek,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En düşük", command=en_düsük,width=gir_width,height=gir_height).pack()
 tk.Button(pencere,text="ATH Değeri",command=ath_göster,width=gir_width,height=gir_height).pack()
