@@ -1611,7 +1611,7 @@ def çapraz_grafikler():
             ax1.plot(fiyatlar1, zamanlar1, color="blue")
             ax1.set_ylabel(f"{sembol1} Fiyatı")
             ax1.tick_params(axis="y", labelcolor="blue")
-            ax2.plot(fiyatalr2, zamanlar2, color="green")
+            ax2.plot(fiyatlar2, zamanlar2, color="green")
             ax2.set_ylabel(f"{sembol1}/{sembol2} Fiyatı")
             ax2.tick_params(axis="y", labelcolor="green")
             ax1.set_title(f"{sembol1}/{sembol2} Fiyatı")
