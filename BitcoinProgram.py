@@ -7,23 +7,33 @@ import requests
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from datetime import datetime
+import time
+from binance.exceptions import BinanceAPIException
 
 client = Client(api_key="", api_secret="")
 
 def göster():
-   try:
-       sembol = str(görüntüle.get())
-       coin = client.get_symbol_ticker(symbol=sembol.upper())
-       messagebox.showinfo("Sonuç ", f"1 {sembol} : {coin['price']}")
-   except:
-       messagebox.showerror("Hata","Bir hata oluştu")
+    try:
+        sembol = str(görüntüle.get())
+        coin = client.get_symbol_ticker(symbol=sembol.upper())
+        messagebox.showinfo("Sonuç", f"{sembol} Anlık Fiyat : {coin['price']}")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+    except Exception as e:
+        messagebox.showerror("HATA",f"{e}")
 def en_yüksek():
    try:
        sembol = str(görüntüle.get())
        coin = client.get_ticker(symbol=sembol.upper())
-       messagebox.showinfo("Sonuç", f"24 Saatte en yüksek : {coin['highPrice']}")
-   except Exception as e:
-       messagebox.showerror("Hata",f"{e}")
+       messagebox.showinfo("Sonuç",f"{sembol} 24 Saat En Yüksek : {coin['highPrice']}")
+   except BinanceAPIException as e:
+       messagebox.showerror("HATA",f"{e.message}")
+   except ValueError:
+       messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+   except ValueError:
+       messagebox.showerror("HATA",f"{e}")
 def en_düsük():
     try:
         sembol = str(görüntüle.get())
@@ -35,9 +45,13 @@ def Hacim_Göster():
     try:
         sembol = str(görüntüle.get())
         coin = client.get_ticker(symbol=sembol.upper())
-        messagebox.showinfo("Sonuç", f"24 Saatlik hacim : {coin['volume']} USDT")
+        messagebox.showinfo("Sonuç",f"{sembol} Anlık Hacim : {coin['volume']}")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
-        messagebox.showerror("Hata",f"{e}")
+        messagebox.showerror("HATA",f"{e}")
 
 
 def ortalama_fonksiyonları():
@@ -265,6 +279,10 @@ def coin_göser():
         tk.Label(root, text=f"ARB : {arb['price']} USDT", fg="white", bg="black", font=('Arial', 20)).place(x=100,
                                                                                                             y=730)
         tk.Label(root, text=f"JUP: {jup['price']} USDT", fg="white", bg="black", font=('Arial', 20)).place(x=800, y=730)
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("HATA",f"{e}")
 
@@ -279,6 +297,10 @@ def ath_göster():
         zirve = [float(k[2]) for k in klines]
         ath = max(zirve)
         messagebox.showinfo("Sonuç", f"{sembol} Tüm zamanlar en yüksek (ATH): {ath}")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("HATA", f"{e}")
 def atl_göster():
@@ -480,6 +502,10 @@ def vadeli():
         fiyat_bilgi = client.futures_symbol_ticker(symbol=sembol.upper())
         fiyat = fiyat_bilgi['price']
         messagebox.showinfo("Sonuç", f"{sembol} vadeli fiyatı : {fiyat} USDT")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 def adil():
@@ -487,6 +513,10 @@ def adil():
         sembol = str(görüntüle.get())
         mark_price = client.futures_mark_price(symbol=sembol.upper())
         messagebox.showinfo("Sonuç", f"Adil değer (Mark Price) : {mark_price['markPrice']} USDT")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 def fonlama():
@@ -494,6 +524,10 @@ def fonlama():
         sembol = str(görüntüle.get())
         fonlama_oranı = client.futures_mark_price(symbol=sembol.upper())
         messagebox.showinfo("Sonuç", f"Son Fonlama Oranı : {fonlama_oranı['lastFundingRate']}")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
@@ -508,6 +542,10 @@ def piyasa_ortalama():
         if price_changes:
             avg_change = sum(price_changes) / len(price_changes)
             messagebox.showinfo("Sonuç", f"Tüm coinlerin 24 saatlik ortalaması : {avg_change}")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
@@ -534,7 +572,10 @@ def genel_veriler():
 
         for başlık, değer in istatistikler.items():
             tk.Label(çerçeve, text=f"{başlık}: {değer}", font=('Arial', 14)).pack(anchor="w", padx=10, pady=2)
-
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("Hata", f"{e}")
 
@@ -575,7 +616,10 @@ def depth_bids():
         tk.Label(sayfa, text=f"Ortalama Satış (VWAP) : {vwap_satıs}", font=('Arial', 20)).pack()
         tk.Label(sayfa,text=f"Alış hacmi : {alıs_hacmi}",font=('Arial',20)).pack()
         tk.Label(sayfa,text=f"Satış hacmi : {satıs_hacmi}",font=('Arial',20)).pack()
-
+     except BinanceAPIException as e:
+         messagebox.showerror("HATA",f"{e.message}")
+     except ValueError:
+         messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanınız")
      except Exception as e:
          messagebox.showerror("Hata",f"{e}")
 
@@ -600,39 +644,49 @@ def min_max_adım():
         tk.Label(çerçeve, text=f"Adım Boyutu : {step_size}", font=('Arial', 20)).pack()
         tk.Label(çerçeve,text=f"Minimum işlem tutarı : {min_nat}",font=('Arial',20)).pack()
 
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
 def en_yüksek_sırala():
-    çerçeve = tk.Toplevel(pencere)
-    çerçeve.title("En çok artanlar")
+    try:
+        çerçeve = tk.Toplevel(pencere)
+        çerçeve.title("En çok artanlar")
 
-    ekran_genişlik = çerçeve.winfo_screenwidth()
-    ekran_yükseklik = çerçeve.winfo_screenheight()
+        ekran_genişlik = çerçeve.winfo_screenwidth()
+        ekran_yükseklik = çerçeve.winfo_screenheight()
 
+        çerçeve.geometry(f"{ekran_genişlik}x{ekran_yükseklik}")
+        çerçeve.resizable(False, False)
 
-    çerçeve.geometry(f"{ekran_genişlik}x{ekran_yükseklik}")
-    çerçeve.resizable(False, False)
+        resim_yolu = r"C:\Users\Mehtap Aysan\Downloads\grafik-17-1132x670.jpg"
+        resim = Image.open(resim_yolu).resize((ekran_genişlik, ekran_yükseklik))
+        çerçeve.arka_plan = ImageTk.PhotoImage(resim)
+        resim_etiketi = tk.Label(çerçeve, image=çerçeve.arka_plan)
+        resim_etiketi.place(x=0, y=0, relwidth=1, relheight=1)
 
-    resim_yolu = r"C:\Users\Mehtap Aysan\Downloads\grafik-17-1132x670.jpg"
-    resim = Image.open(resim_yolu).resize((ekran_genişlik, ekran_yükseklik))
-    çerçeve.arka_plan = ImageTk.PhotoImage(resim)
-    resim_etiketi = tk.Label(çerçeve, image=çerçeve.arka_plan)
-    resim_etiketi.place(x=0, y=0, relwidth=1, relheight=1)
+        veriler = client.get_ticker()
+        usdt_coinler = [v for v in veriler if v['symbol'].endswith('USDT')]
+        sıralı = sorted(usdt_coinler, key=lambda x: float(x['priceChangePercent']), reverse=True)
 
-    veriler = client.get_ticker()
-    usdt_coinler = [v for v in veriler if v['symbol'].endswith('USDT')]
-    sıralı = sorted(usdt_coinler, key=lambda x: float(x['priceChangePercent']), reverse=True)
-
-    for i, coin in enumerate(sıralı[:19]):
-        yazı = f"{i+1}. {coin['symbol']} %{coin['priceChangePercent']} artış."
-        tk.Label(
-            çerçeve,
-            text=yazı,
-            font=('Arial', 18, 'bold'),
-            fg="white",
-            bg="black"
-        ).place(x=30, y=30 + i * 40)
+        for i, coin in enumerate(sıralı[:19]):
+            yazı = f"{i + 1}. {coin['symbol']} %{coin['priceChangePercent']} artış."
+            tk.Label(
+                çerçeve,
+                text=yazı,
+                font=('Arial', 18, 'bold'),
+                fg="white",
+                bg="black"
+            ).place(x=30, y=30 + i * 40)
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+    except Exception as e:
+        messagebox.showerror("HATA",f"{e}")
 
 
 
@@ -664,6 +718,10 @@ def en_çok_düşenler():
                 fg="white",
                 bg="black"
             ).place(x=30, y=30 + i * 40)
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("HATA",f"{e}")
 
@@ -689,6 +747,10 @@ def al_sat_sinyal_2():
             messagebox.showwarning("DİKKAT", "SATIM SİNYALİ")
         else:
             messagebox.showwarning("DİKKAT", "BEKLE")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
     except Exception as e:
         messagebox.showerror("HATA",f"{e}")
 
@@ -707,6 +769,10 @@ def pump_dump_dedektör():
                 messagebox.showinfo("DİKKAT", f"DUMP TESPİT EDİLDİ . Değişim : %{değişim_5dk}")
         else:
             messagebox.showinfo(f"BİLGİ", "DUMP VEYA PUMP TESPİT EDİLMEDİ")
+    except BinanceAPIException as e:
+        messagebox.showerror("HATA",f"{e.message}")
+    except ValueError:
+        messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
@@ -740,6 +806,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -765,6 +835,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -791,6 +865,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -814,6 +892,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -837,6 +919,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -860,6 +946,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -883,6 +973,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lüfen Geçerli Coinler Giriniz")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -906,8 +1000,39 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
+
+    def grafik_45_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("45 Dakikalık Değişim Grafiği")
+            grafik_pencere.geometry("1000x800")
+            sembol = str(görüntüle2.get()).upper()
+            klines = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_1MINUTE, limit=45)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 45 Dakikalık Değişim Grafiği")
+            ax.set_xlabel("Fiyat")
+            ax.set_ylabel("Zaman")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
 
     def grafik_1_hafta():
         try:
@@ -929,8 +1054,39 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
+
+    def grafik_2_hafta():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Haftalık Grafik")
+            grafik_pencere.geometry("800x600")
+            sembol = görüntüle2.get()
+            klines = client.get_klines(symbol=sembol.upper(),interval="8h",limit=1008)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 2 Haftalık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
 
     def grafik_1_ay():
         try:
@@ -952,6 +1108,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -961,7 +1121,7 @@ def grafik_fonksiyonları():
             grafik_pencere.title("3 Aylık Grafik")
             grafik_pencere.geometry("800x600")
             sembol = görüntüle2.get()
-            klines = client.get_klines(symbol=sembol.upper(),interval="3h", limit=720)
+            klines = client.get_klines(symbol=sembol.upper(),interval=client.KLINE_INTERVAL_6HOUR, limit=360)
             zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
             fiyatlar = [float(k[4]) for k in klines]
             fig = Figure(figsize=(10, 5), dpi=100)
@@ -975,6 +1135,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -998,8 +1162,39 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
+
+    def grafik_9_ay():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("9 Aylık Kripto Para Görüntüleme Menüsü")
+            sembol = str(görüntüle2.get()).upper()
+            grafik_pencere.geometry("1000x600")
+            klines = client.get_klines(symbol=sembol, interval="12h", limit=540)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 9 Aylık Fiyat Değişim Grafiği")
+            ax.set_xlabel("Fiyatlar")
+            ax.set_ylabel("Zaman")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as a:
+            messagebox.showerror("HATA",f"{a.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
 
     def grafik_1_yıl():
         try:
@@ -1022,29 +1217,40 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerrror("HATA","Lütfen Geçerli Karakterler Kullanınız")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
     def grafik_5_yıl():
-        grafik_pencere = tk.Toplevel(çerçeve)
-        grafik_pencere.title("5 Yıllık Değişim Grafiği")
-        grafik_pencere.geometry("100x600")
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("5 Yıllık Değişim Grafiği")
+            grafik_pencere.geometry("100x600")
 
-        sembol = str(görüntüle2.get())
-        klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=912)
-        zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
-        fiyatlar = [float(k[4]) for k in klines]
-        fig = Figure(figsize=(10, 5), dpi=100)
-        ax = fig.add_subplot(111)
-        ax.plot(zamanlar, fiyatlar, color="blue")
-        ax.set_title(f"{sembol} 5 Yıllık Değişim Grafiği")
-        ax.set_ylabel("Fiyat")
-        ax.set_xlabel("Tarih")
-        ax.grid(True)
-        fig.autofmt_xdate(rotation=45)
-        canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
-        canvas.draw()
-        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_3DAY, limit=609)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 5 Yıllık Değişim Grafiği")
+            ax.set_ylabel("Fiyat")
+            ax.set_xlabel("Tarih")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
 
     def grafik_2_yıl():
         try:
@@ -1066,6 +1272,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanınız")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
 
@@ -1074,7 +1284,7 @@ def grafik_fonksiyonları():
         try:
             grafik_pencere = tk.Toplevel(çerçeve)
             grafik_pencere.title("3 Yıllık Değişim Grafiği")
-            grafik_pencere.geometry("100x600")
+            grafik_pencere.geometry("1000x600")
             sembol = str(görüntüle2.get())
             klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=547)
             zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
@@ -1090,6 +1300,10 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA","Lütfen Geçerli bir coin ismi giriniz")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler kullanınız")
         except Exception as e:
             messagebox.showerror("HATA",f"{e}")
 
@@ -1099,7 +1313,7 @@ def grafik_fonksiyonları():
             grafik_pencere.title("5 Yıllık Değişim Grafiği")
             grafik_pencere.geometry("100x600")
             sembol = str(görüntüle2.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval="2d", limit=730)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_3DAY, limit=487)
             zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
             fiyatlar = [float(k[4]) for k in klines]
             fig = Figure(figsize=(10, 5), dpi=100)
@@ -1113,8 +1327,90 @@ def grafik_fonksiyonları():
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanın")
         except Exception as e:
             messagebox.showerror("HATA", f"{e}")
+
+    def grafik_6_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_3DAY, limit=730)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="green")
+            ax.set_title(f"{sembol} 6 Yıllık Fiyat Değişim Grafiği")
+            ax.set_xlabel("Fiyat")
+            ax.set_ylabel("Zaman")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_7_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_3DAY, limit=852)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 7 Yıllık Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_8_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get()).upper()
+            klines = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_3DAY, limit=973)
+            zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
+            fiyatlar = [float(k[4]) for k in klines]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(zamanlar, fiyatlar, color="blue")
+            ax.set_title(f"{sembol} 8 Yıllık Fiyat Değişim Grafiği")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exceptiaon as e:
+            messagebox.showerror("HATA",f"{e}")
 
 
     tk.Label(çerçeve, text="Grafiğini görüntülemek istediğiniz coin'i girin").pack()
@@ -1126,19 +1422,686 @@ def grafik_fonksiyonları():
     tk.Button(çerçeve, text="5 Dakikalık Grafik", command=grafik_5_dakika, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="15 Dakikalık Grafik", command=grafik_15_dakika, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="30 Dakikalık Grafik", command=grafik_30_dk, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve,text="45 Dakikalık Grafik",command=grafik_45_dakika,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve, text="1 Saatlik Grafik", command=grafik_1_saat, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="6 Saatlik Grafik", command=grafik_6_saat, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="12 Saatlik Grafik", command=grafik_12_saat, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="24 Saatlik Grafik", command=grafik_24_saat, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="1 Haftalık Grafik", command=grafik_1_hafta, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve,text="2 Haftalık Grafik",command=grafik_2_hafta,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve, text="1 Aylık Grafik", command=grafik_1_ay, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="3 Aylık Grafik", command=grafik_3_ay, width=gir_width, height=gir_height).pack()
     tk.Button(çerçeve, text="6 Aylık Grafik", command=grafik_6_ay, width=gir_width, height=gir_height).pack()
+    tk.Button(çerçeve,text="9 Aylık Grafik",command=grafik_9_ay,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="1 Yıllık Grafik",command=grafik_1_yıl,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="2 Yıllık Grafik",command=grafik_2_yıl,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="3 Yıllık Grafik",command=grafik_3_yıl,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="4 Yıllık Grafik",command=grafik_4_yıl,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="5 Yıllık Grafik",command=grafik_5_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="6 Yıllık Grafik",command=grafik_6_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="7 Yıllık Grafik",command=grafik_7_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="8 Yıllık Grafik",command=grafik_8_yıl,width=gir_width,height=gir_height).pack()
+
+def çapraz_grafikler():
+    çerçeve = tk.Toplevel(pencere)
+    çerçeve.title("Çapraz Grafikler Penceresi")
+
+    def grafik_çapraz_1_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1,interval=client.KLINE_INTERVAL_1SECOND,limit=60)
+            klines2 = client.get_klines(symbol=sembol2,interval=client.KLINE_INTERVAL_1SECOND,limit=60)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1,fiyatlar1,color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y",color="green")
+            ax2.plot(zamanlar2,fiyatlar2,color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y",color="blue")
+            ax1.set_title(f"{sembol1}/{sembol2} 1 Dakikalık Fiyat Değişim Grafiği")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+
+
+    def çapraz_5_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_1SECOND, limit=300)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_1SECOND, limit=300)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax1.set_ylabel(f"{sembol2} fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 5 Dakikalık Fiyat Değişim Grafiği")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA", f"Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_30_dakika():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get())
+            sembol2 = str(görüntüle3.get())
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_1MINUTE, limit=30)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_1MINUTE, limit=30)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+            ax1.set_title(f"{sembol1}/{sembol2} 30 Dakikalık Fiyat Değişim Grafikleri")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+
+    def çapraz_grafik_1_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_1MINUTE, limit=60)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_1MINUTE, limit=60)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(fiyatlar1, zamanlar1, color="blue", label=sembol1)
+            ax2.plot(fiyatlar2, zamanlar2, color="green", label=sembol2)
+
+            ax1.set_ylabel(f"{sembol1} Fiyatı", color="blue")
+            ax1.tick_params(axis='y', labelcolor="blue")
+
+            ax2.set_ylabel(f"{sembol2} Fiyatı", color="green")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 1 Saatlik Fiyat Karşılaştırması")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfern Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_12_saat():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_1MINUTE, limit=720)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_1MINUTE, limit=720)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(fiyatlar1, zamanlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+            ax2.plot(fiyatalr2, zamanlar2, color="green")
+            ax2.set_ylabel(f"{sembol1}/{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+            ax1.set_title(f"{sembol1}/{sembol2} Fiyatı")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+    def grafik_çapraz_1_gün():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval="5m", limit=480)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            klines2 = client.get_klines(symbol=sembol2, interval="5m", limit=480)
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+
+            ax1.plot(zamanlar1, fiyatlar1, color="blue", label=sembol1)
+            ax1.set_ylabel(f"{sembol1} Fiyatı", color="blue")
+            ax1.tick_params(axis='y', labelcolor="blue")
+
+            ax2 = ax1.twinx()
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green", label=sembol2)
+            ax2.set_ylabel(f"{sembol2} Fiyatı", color="green")
+            ax2.tick_params(axis='y', labelcolor="green")
+
+            ax1.set_title(f"{sembol1} / {sembol2} Çapraz Grafik")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_1_hafta():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.title("1 Haftalık Çapraz Grafik")
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval="1h", limit=720)
+            klines2 = client.get_klines(symbol=sembol2, interval="1h", limit=720)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} Fiyat Değişim Grafiği")
+            ax1.set_xlabel("Fiyat")
+            ax1.set_ylabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+
+    def grafik_çapraz_1_ay():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval="1h", limit=730)
+            klines2 = client.get_klines(symbol=sembol2, interval="1h", limit=730)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+
+            ax1.plot(zamanlar1, fiyatlar1, color="blue", label=sembol1)
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis='y', labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green", label=sembol2)
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis='y', labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} Fiyat Değişim Grafiği")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+
+    def grafik_çapraz_6_ay():
+            try:
+                grafik_pencere = tk.Toplevel(çerçeve)
+                grafik_pencere.geometry("1000x600")
+
+                sembol1 = str(görüntüle2.get()).upper()
+                sembol2 = str(görüntüle3.get()).upper()
+
+                klines1 = client.get_klines(symbol=sembol1, interval="6h", limit=720)
+                klines2 = client.get_klines(symbol=sembol2, interval="6h", limit=720)
+
+                zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+                fiyatlar1 = [float(k[4]) for k in klines1]
+
+                zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+                fiyatlar2 = [float(k[4]) for k in klines2]
+
+                fig = Figure(figsize=(10, 5), dpi=100)
+                ax1 = fig.add_subplot(111)
+                ax2 = ax1.twinx()
+
+                ax1.plot(zamanlar1, fiyatlar1, color="blue", label=sembol1)
+                ax1.set_ylabel(f"{sembol1} Fiyatı", color="blue")
+                ax1.tick_params(axis='y', labelcolor="blue")
+
+                ax2.plot(zamanlar2, fiyatlar2, color="green", label=sembol2)
+                ax2.set_ylabel(f"{sembol2} Fiyatı", color="green")
+                ax2.tick_params(axis="y", labelcolor="green")
+
+                ax1.set_title(f"{sembol1}/{sembol2} 6 Aylık Fiyat Karşılaştırması")
+                ax1.set_xlabel("Zaman")
+                ax1.grid(True)
+                ax2.legend(loc="upper right")
+
+                fig.autofmt_xdate(rotation=45)
+
+                canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+                canvas.draw()
+                canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+            except BinanceAPIException as e:
+                messagebox.showerror("HATA", f"{e.message}")
+
+    def grafik_çapraz_1_yıl():
+       try:
+           grafik_pencere = tk.Toplevel(çerçeve)
+           grafik_pencere.geometry("1000x600")
+           sembol1 = str(görüntüle2.get()).upper()
+           sembol2 = str(görüntüle3.get()).upper()
+           klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_12HOUR, limit=730)
+           klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_12HOUR, limit=730)
+           zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+           fiyatlar1 = [float(k[4]) for k in klines1]
+           zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+           fiyatlar2 = [float(k[4]) for k in klines2]
+           fig = Figure(figsize=(10, 5), dpi=100)
+           ax1 = fig.add_subplot(111)
+           ax2 = ax1.twinx()
+
+           ax1.plot(zamanlar1, fiyatlar1, color="blue", label=sembol1)
+           ax1.set_ylabel(f"{sembol1} Fiyatı")
+           ax1.tick_params(axis="y", labelcolor="blue")
+
+           ax2.plot(zamanlar2, fiyatlar2, color="green", label=sembol2)
+           ax2.set_ylabel(f"{sembol2} Fiyatı")
+           ax2.tick_params(axis="y", labelcolor="green")
+
+           ax1.set_title(f"{sembol1}/{sembol2} 1 Yıllık Fiyat Değişim Grafiği")
+           ax1.set_xlabel("Zaman")
+           ax1.grid(True)
+           fig.autofmt_xdate(rotation=45)
+           canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+           canvas.draw()
+           canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+       except BinanceAPIException as e:
+           messagebox.showerror("HATA",f"{e.message}")
+       except ValueError:
+           messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+       except Exception as e:
+           messagebox.showerror("HATA",f"{e}")
+
+    def çapraz_grafik_2_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_1DAY, limit=730)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_1DAY, limit=730)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+
+            ax1.plot(zamanlar1, fiyatlar1, color="blue", label=sembol1)
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green", label=sembol2)
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 2 Yıllık Fiyat Değişim Grafikleri")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA",f"Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def çapraz_grafik_3_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=365)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=365)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_title(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 3 Yıllık Fiyat Değişim Grafiği")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_4_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get())
+            sembol2 = str(görüntüle3.get())
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=487)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=487)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_xlabel(f"{sembol1}/{sembol2} 4 Yıllık Değişim Grafikleri")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_5_yıl():
+       try:
+           grafik_pencere = tk.Toplevel(çerçeve)
+           grafik_pencere.title("5 Yıllık Kripto Para Penceresi")
+           grafik_pencere.geometry("1000x600")
+           sembol1 = str(görüntüle2.get()).upper()
+           sembol2 = str(görüntüle3.get()).upper()
+           klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=609)
+           klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=609)
+           zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+           fiyatlar1 = [float(k[4]) for k in klines1]
+           zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+           fiyatlar2 = [float(k[4]) for k in klines2]
+           fig = Figure(figsize=(10, 5), dpi=100)
+           ax1 = fig.add_subplot(111)
+           ax2 = ax1.twinx()
+
+           ax1.plot(zamanlar1, fiyatlar1, color="blue")
+           ax1.set_ylabel(f"{sembol1} Fiyatı")
+           ax1.tick_params(axis="y", labelcolor="blue")
+
+           ax2.plot(zamanlar2, fiyatlar2, color="green")
+           ax2.set_ylabel(f"{sembol2} Fiyatı")
+           ax2.tick_params(axis="y", labelcolor="green")
+
+           ax1.set_title(f"{sembol1}/{sembol2} 5 Yıllık Değişim Grafiği")
+           ax1.set_xlabel("Zaman")
+           ax1.grid(True)
+           fig.autofmt_xdate(rotation=45)
+           canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+           canvas.draw()
+           canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+       except BinanceAPIException as e:
+           messagebox.showerror("HATA",f"{e.message}")
+       except ValueError:
+           messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+       except Exception as e:
+           messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_6_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=730)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=730)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı ")
+            ax1.tick_params(axis="y", labelcolor="blue")
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 6 Yıllık Fiyat Değişimi Karşılaştırması")
+            ax1.set_xlabel("Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_7_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=852)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=852)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 7 Yıllık Fiyat Değişim Grafiği")
+            ax1.set_xlabel(f"Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Doğru Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def grafik_çapraz_8_yıl():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol1 = str(görüntüle2.get()).upper()
+            sembol2 = str(görüntüle3.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=974)
+            klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=974)
+            zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
+            fiyatlar1 = [float(k[4]) for k in klines1]
+            zamanlar2 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines2]
+            fiyatlar2 = [float(k[4]) for k in klines2]
+            fig = Figure(figsize=(10, 5), dpi=100)
+            ax1 = fig.add_subplot(111)
+            ax2 = ax1.twinx()
+            ax1.plot(zamanlar1, fiyatlar1, color="blue")
+            ax1.set_ylabel(f"{sembol1} Fiyatı")
+            ax1.tick_params(axis="y", labelcolor="blue")
+
+            ax2.plot(zamanlar2, fiyatlar2, color="green")
+            ax2.set_ylabel(f"{sembol2} Fiyatı")
+            ax2.tick_params(axis="y", labelcolor="green")
+
+            ax1.set_title(f"{sembol1}/{sembol2} 8 Yıllık Fiyat Değişim Grafiği")
+            ax1.set_xlabel(f"Zaman")
+            ax1.grid(True)
+            fig.autofmt_xdate(rotation=45)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+
+
+
+    tk.Label(çerçeve,text="Çapraz Grafiğini Görüntülemek istediğiniz iki coin i aşağıya ayrı ayrı girin").pack()
+    görüntüle2 = tk.Entry(çerçeve)
+    görüntüle2.pack()
+    görüntüle3 = tk.Entry(çerçeve)
+    görüntüle3.pack()
+
+    gir_width = 10
+    gir_height = 1
+    tk.Button(çerçeve,text="1 Dakikalık",command=grafik_çapraz_1_dakika,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="5 Dakikalık",command=çapraz_5_dakika,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="30 Dakikalık",command=grafik_çapraz_30_dakika,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Saatlik",command=çapraz_grafik_1_saat,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="12 Saatlik",command=grafik_çapraz_12_saat,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Günlük",command=grafik_çapraz_1_gün,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Hafta",command=grafik_çapraz_1_hafta,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Aylık",command=grafik_çapraz_1_ay,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="6 Aylık",command=grafik_çapraz_6_ay,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Yıllık",command=grafik_çapraz_1_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="2 Yıllık",command=çapraz_grafik_2_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="3 Yıllık",command=çapraz_grafik_3_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="4 Yıllık",command=grafik_çapraz_4_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="5 Yıllık",command=grafik_çapraz_5_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="6 Yıllık",command=grafik_çapraz_6_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="7 Yıllık",command=grafik_çapraz_7_yıl,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="8 Yıllık",command=grafik_çapraz_8_yıl,width=gir_width,height=gir_height).pack()
 
 
 pencere = tk.Tk()
@@ -1163,6 +2126,7 @@ gir_width = 20
 gir_height=1
 
 tk.Button(pencere, text="Anlık fiyat", command=göster,width=gir_width,height=gir_height).pack()
+tk.Button(pencere,text="Çapraz Grafikler",command=çapraz_grafikler,width=gir_width,height=gir_height).pack()
 tk.Button(pencere,text="Değişim Grafikleri",command=grafik_fonksiyonları,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En yüksek", command=en_yüksek,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En düşük", command=en_düsük,width=gir_width,height=gir_height).pack()
