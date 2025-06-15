@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import matplotlib.pyplot as plt
 from binance.client import Client
 import pandas as pd
 from PIL import Image,ImageTk
@@ -36,9 +37,9 @@ def en_yüksek():
        messagebox.showerror("HATA",f"{e}")
 def en_düsük():
     try:
-        sembol = str(görüntüle.get())
-        coin = client.get_ticker(symbol=sembol.upper())
-        messagebox.showinfo("Sonuç", f"24 Saate en düşük {coin['lowPrice']}")
+        sembol = str(görüntüle.get()).upper()
+        coin = client.get_ticker(symbol=sembol)
+        messagebox.showinfo(f"24 Saat En Düşük : {coin['lowPrice']}")
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 def Hacim_Göster():
@@ -98,7 +99,7 @@ def ortalama_fonksiyonları():
     def ortalama_1_hour():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval="5m", limit=12)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=60)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 1 saatlik ortalaması : {avg_price}")
@@ -108,7 +109,7 @@ def ortalama_fonksiyonları():
     def ortalama_6_saat():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval="15m", limit=24)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1MINUTE, limit=360)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 6 saatlik ortalaması : {avg_price}")
@@ -128,7 +129,7 @@ def ortalama_fonksiyonları():
     def ortalama_1_day():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1HOUR, limit=24)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_15MINUTE, limit=96)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 1 günlük ortalaması : {avg_price}")
@@ -138,7 +139,7 @@ def ortalama_fonksiyonları():
     def ortalama_1_hafta():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_12HOUR, limit=14)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_2HOURHOUR, limit=84)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 1 haftalık ortalaması : {avg_price}")
@@ -148,7 +149,7 @@ def ortalama_fonksiyonları():
     def ortalama_2_hafta():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_12HOUR, limit=28)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_2HOUR, limit=168)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 2 haftalık ortalaması : {avg_price}")
@@ -157,7 +158,7 @@ def ortalama_fonksiyonları():
     def ortalama_3_hafta():
         try:
             sembol = str(görüntüle.get())
-            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_12HOUR, limit=42)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_6HOUR, limit=84)
             prices1 = [float(kline[4]) for kline in klines]
             avg_price = sum(prices1) / len(prices1)
             messagebox.showinfo("Sonuç", f"{sembol} 3 haftalık ortalaması : {avg_price}")
@@ -776,6 +777,130 @@ def pump_dump_dedektör():
     except Exception as e:
         messagebox.showerror("Hata",f"{e}")
 
+def ema_grafikleri():
+    çerçeve = tk.Toplevel(pencere)
+    çerçeve.title("HAREKETLİ ÜSLÜ ORTLAMALA GRAFİKLERİ")
+
+
+    def ema_100_gün():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_1DAY, limit=100)
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 100 GÜNLÜK EMA GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def ema_30_gün():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_6HOUR, limit=120)
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 30 GÜNLÜK EMA GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def ema_1_gün():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get()).upper()
+            klines = client.get_klines(symbol=sembol, interval=client.KLINE_INTERVAL_5MINUTE, limit=288)
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 1 GÜNLÜK EMA GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+
+    tk.Label(çerçeve,text="EMA (HAREKETLİ ÜSLÜ ORTAlAMA) Grafiğini Görüntülemek istediğiniz Kripto Parayı Girin")
+    görüntüle2 = tk.Entry(çerçeve)
+    görüntüle2.pack()
+    gir_width = 10
+    gir_height = 1
+    tk.Button(çerçeve,text="1 Günlük",command=ema_1_gün,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="30 Günlük",command=ema_30_gün,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="100 GÜNLÜK",command=ema_100_gün,width=gir_width,height=gir_height).pack()
+
+
 def grafik_fonksiyonları():
     çerçeve = tk.Toplevel(pencere)
     çerçeve.title("Grafikler Menüsü")
@@ -1148,7 +1273,7 @@ def grafik_fonksiyonları():
             grafik_pencere.title("6 Aylık Grafik")
             grafik_pencere.geometry("800x600")
             sembol = görüntüle2.get()
-            klines = client.get_klines(symbol=sembol.upper(), interval="5h", limit=864)
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_6HOUR, limit=720)
             zamanlar = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines]
             fiyatlar = [float(k[4]) for k in klines]
             fig = Figure(figsize=(10, 5), dpi=100)
@@ -1570,8 +1695,8 @@ def çapraz_grafikler():
             fig = Figure(figsize=(10, 5), dpi=100)
             ax1 = fig.add_subplot(111)
             ax2 = ax1.twinx()
-            ax1.plot(fiyatlar1, zamanlar1, color="blue", label=sembol1)
-            ax2.plot(fiyatlar2, zamanlar2, color="green", label=sembol2)
+            ax1.plot(zamanlar2,fiyatlar2, color="blue", label=sembol1)
+            ax2.plot(zamanlar2,fiyatlar2, color="green", label=sembol2)
 
             ax1.set_ylabel(f"{sembol1} Fiyatı", color="blue")
             ax1.tick_params(axis='y', labelcolor="blue")
@@ -1699,6 +1824,8 @@ def çapraz_grafikler():
             messagebox.showerror("HATA",f"{e.message}")
         except ValueError:
             messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
 
     def grafik_çapraz_1_ay():
         try:
@@ -1733,6 +1860,7 @@ def çapraz_grafikler():
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         except BinanceAPIException as e:
             messagebox.showerror("HATA",f"{e.message}")
+
 
     def grafik_çapraz_6_ay():
             try:
@@ -1912,6 +2040,7 @@ def çapraz_grafikler():
             ax2.set_ylabel(f"{sembol2} Fiyatı")
             ax2.tick_params(axis="y", labelcolor="green")
 
+            ax1.set_title(f"{sembol1}/{sembol2} 4 Yıllık Fiyat Değişim Grafikleri")
             ax1.set_xlabel(f"{sembol1}/{sembol2} 4 Yıllık Değişim Grafikleri")
             ax1.grid(True)
             fig.autofmt_xdate(rotation=45)
@@ -1969,8 +2098,8 @@ def çapraz_grafikler():
             grafik_pencere = tk.Toplevel(çerçeve)
             grafik_pencere.geometry("1000x600")
             sembol1 = str(görüntüle2.get()).upper()
+            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY,limit=730)
             sembol2 = str(görüntüle3.get()).upper()
-            klines1 = client.get_klines(symbol=sembol1, interval=client.KLINE_INTERVAL_3DAY, limit=730)
             klines2 = client.get_klines(symbol=sembol2, interval=client.KLINE_INTERVAL_3DAY, limit=730)
             zamanlar1 = [datetime.fromtimestamp(int(k[0]) / 1000) for k in klines1]
             fiyatlar1 = [float(k[4]) for k in klines1]
@@ -2128,6 +2257,7 @@ gir_height=1
 tk.Button(pencere, text="Anlık fiyat", command=göster,width=gir_width,height=gir_height).pack()
 tk.Button(pencere,text="Çapraz Grafikler",command=çapraz_grafikler,width=gir_width,height=gir_height).pack()
 tk.Button(pencere,text="Değişim Grafikleri",command=grafik_fonksiyonları,width=gir_width,height=gir_height).pack()
+tk.Button(pencere,text="EMA GRAFİKLERİ",command=ema_grafikleri,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En yüksek", command=en_yüksek,width=gir_width,height=gir_height).pack()
 tk.Button(pencere, text="En düşük", command=en_düsük,width=gir_width,height=gir_height).pack()
 tk.Button(pencere,text="ATH Değeri",command=ath_göster,width=gir_width,height=gir_height).pack()
