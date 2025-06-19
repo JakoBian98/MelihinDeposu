@@ -205,7 +205,6 @@ def coin_göser():
     try:
         root = tk.Toplevel(pencere)
         root.title("Görüntüleme menüsü")
-        img_path = "C:/Users/Mehtap Aysan/Downloads/grafik-yl9l_cover.jpg"
         img = Image.open(img_path)
         ekran_genişliği = root.winfo_screenwidth()
         ekran_yüksekliği = root.winfo_screenheight()
@@ -624,18 +623,20 @@ def depth_bids():
      except Exception as e:
          messagebox.showerror("Hata",f"{e}")
 
+
 def min_max_adım():
     try:
         sembol = str(görüntüle.get())
         bilgi = client.get_symbol_info(symbol=sembol.upper())
-        min_qty = max_qty = step_size = ""
+        min_qty = max_qty = step_size = min_nat = "Veri yok"
+
         for f in bilgi['filters']:
             if f['filterType'] == 'LOT_SIZE':
                 min_qty = f['minQty']
                 max_qty = f['maxQty']
                 step_size = f['stepSize']
-            elif f['filterType'] == 'MİN_NATİONAL':
-                min_nat = f['minNational']
+            elif f['filterType'] == 'MIN_NOTIONAL':
+                min_nat = f['minNotional']
                 break
 
         çerçeve = tk.Toplevel(pencere)
@@ -643,7 +644,9 @@ def min_max_adım():
         tk.Label(çerçeve, text=f"Minimum hacim : {min_qty}", font=('Arial', 20)).pack()
         tk.Label(çerçeve, text=f"Maksimum hacim : {max_qty}", font=('Arial', 20)).pack()
         tk.Label(çerçeve, text=f"Adım Boyutu : {step_size}", font=('Arial', 20)).pack()
-        tk.Label(çerçeve,text=f"Minimum işlem tutarı : {min_nat}",font=('Arial',20)).pack()
+        tk.Label(çerçeve, text=f"Minimum işlem tutarı : {min_nat}", font=('Arial', 20)).pack()
+    except Exception as e:
+        messagebox.showerror("HATA", f"Hata oluştu: {e}")
 
     except BinanceAPIException as e:
         messagebox.showerror("HATA",f"{e.message}")
@@ -875,7 +878,115 @@ def ema_grafikleri():
             ax.plot(df["date"], df["close"], color="blue")
             ax.plot(df["date"], df["EMA-10"], color="green")
             ax.plot(df["date"], df["EMA-30"], color="black")
-            ax.set_title(f"{sembol} 1 GÜNLÜK EMA GRAFİĞİ")
+            ax.set_title(f"{sembol} 1 GÜNLÜK EMA (HAREKETLİ ÜSLÜ ORTALAMA) GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def ema_7_günlük():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get()).upper()
+            klines = client.get_klines(symbol=sembol.upper(interval=client.KLINE_INTERVAL_15MINUTE, limit=672))
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 1 HAFTALIK EMA (HAREKETLİ ÜSLÜ ORTALAMA) GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def ema_180_günlük():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("1000x600")
+            sembol = str(görüntüle2.get()).upper()
+            klines = client.get_klines(symbol, interval=client.KLINE_INTERVAL_6HOUR, limit=720)
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 6 AYLIK EMA (HAREKETLİ ÜSLÜ ORTALAMA) GRAFİĞİ")
+            ax.set_xlabel("Zaman")
+            ax.set_ylabel("Fiyat")
+            ax.legend()
+            ax.grid(True)
+            canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
+            canvas.draw()
+            canvas.get_tk_widget().pack(pady=10)
+        except BinanceAPIException as e:
+            messagebox.showerror("HATA",f"{e.message}")
+        except ValueError:
+            messagebox.showerror("HATA","Lütfen Geçerli Karakterler Kullanın")
+        except Exception as e:
+            messagebox.showerror("HATA",f"{e}")
+
+    def ema_360_gün():
+        try:
+            grafik_pencere = tk.Toplevel(çerçeve)
+            grafik_pencere.geometry("100x600")
+            sembol = str(görüntüle2.get())
+            klines = client.get_klines(symbol=sembol.upper(), interval=client.KLINE_INTERVAL_12HOUR, limit=720)
+            df = pd.DataFrame(klines, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_volume", "taker_buy_quote_volume", "ignore"
+            ])
+            df["date"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close"] = pd.to_numeric(df["close"])
+
+            df["EMA-10"] = df["close"].ewm(span=10, adjust=False).mean()
+            df["EMA-30"] = df["close"].ewm(span=30, adjust=False).mean()
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(df["date"], df["close"], color="blue")
+            ax.plot(df["date"], df["EMA-10"], color="green")
+            ax.plot(df["date"], df["EMA-30"], color="black")
+            ax.set_title(f"{sembol} 1 YILLIK EMA (HAREKETLİ ÜSLÜ ORTALAMA) GRAFİĞİ")
             ax.set_xlabel("Zaman")
             ax.set_ylabel("Fiyat")
             ax.legend()
@@ -891,14 +1002,18 @@ def ema_grafikleri():
             messagebox.showerror("HATA",f"{e}")
 
 
+
     tk.Label(çerçeve,text="EMA (HAREKETLİ ÜSLÜ ORTAlAMA) Grafiğini Görüntülemek istediğiniz Kripto Parayı Girin")
     görüntüle2 = tk.Entry(çerçeve)
     görüntüle2.pack()
     gir_width = 10
     gir_height = 1
     tk.Button(çerçeve,text="1 Günlük",command=ema_1_gün,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="1 Haftalık",command=ema_7_günlük,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="30 Günlük",command=ema_30_gün,width=gir_width,height=gir_height).pack()
     tk.Button(çerçeve,text="100 GÜNLÜK",command=ema_100_gün,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="180 GÜNLÜK",command=ema_180_günlük,width=gir_width,height=gir_height).pack()
+    tk.Button(çerçeve,text="360 GÜNLÜK",command=ema_360_gün,width=gir_width,height=gir_height).pack()
 
 
 def grafik_fonksiyonları():
@@ -1733,13 +1848,13 @@ def çapraz_grafikler():
             fig = Figure(figsize=(10, 5), dpi=100)
             ax1 = fig.add_subplot(111)
             ax2 = ax1.twinx()
-            ax1.plot(fiyatlar1, zamanlar1, color="blue")
+            ax1.plot(zamanlar1,fiyatlar, color="blue")
             ax1.set_ylabel(f"{sembol1} Fiyatı")
             ax1.tick_params(axis="y", labelcolor="blue")
             ax2.plot(fiyatlar2, zamanlar2, color="green")
             ax2.set_ylabel(f"{sembol1}/{sembol2} Fiyatı")
             ax2.tick_params(axis="y", labelcolor="green")
-            ax1.set_title(f"{sembol1}/{sembol2} Fiyatı")
+            ax1.set_title(f"{sembol1}/{sembol2} 12 Saatlik Değişim Grafiği")
             ax1.grid(True)
             fig.autofmt_xdate(rotation=45)
             canvas = FigureCanvasTkAgg(fig, master=grafik_pencere)
